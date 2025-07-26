@@ -4,9 +4,15 @@ import UserModel from '../models/user';
 import sendEmail  from '../utils/sendEmail';
 import  {generateResetToken}  from '../utils/tokenGenerator';
 import ActivityModel from '../models/activity';
+import jwt from 'jsonwebtoken';
 
 interface RegisterAdminInput {
   name: string;
+  email: string;
+  password: string;
+}
+
+interface LoginInput {
   email: string;
   password: string;
 }
@@ -117,6 +123,42 @@ export async function resetPassword(resetToken: string, newPassword: string) {
 
   return true;
 }
+
+
+export const loginUserService = async (data: LoginInput) => {
+  const { email, password } = data;
+
+  // Find user by email
+  const user = await UserModel.findOne({ email });
+  if (!user) {
+    throw new Error('Invalid email or password');
+  }
+
+  // Compare password
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    throw new Error('Invalid email or password');
+  }
+
+  // Set isOnline to true
+  user.isOnline = true;
+  await user.save();
+
+  // Generate JWT token (optional, adjust secret & expiry as you want)
+  const token = jwt.sign(
+    { id: user._id, role: user.role },
+    process.env.JWT_SECRET || 'secret',
+    { expiresIn: '1d' }
+  );
+
+  return {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    token,
+  };
+};
 
 
 export { generateResetToken };

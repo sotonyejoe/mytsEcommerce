@@ -8,6 +8,8 @@ export interface IUser extends Document {
   role: 'user' | 'admin' | 'subadmin';
   isOnline: boolean;
   lastSeen: Date;
+  address: string;
+  phone: string;
   resetPasswordToken?: string;
   resetPasswordExpire?: Date;
   createdAt: Date;
@@ -23,10 +25,11 @@ const userSchema = new Schema<IUser>(
       trim: true
     },
     email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true
+       type: String,
+       required: true,
+       unique: true,
+       lowercase: true,
+       trim: true,
     },
     password: {
       type: String,
@@ -36,6 +39,12 @@ const userSchema = new Schema<IUser>(
       type: String,
       enum: ['user', 'admin', 'subadmin'],
       default: 'user'
+    },
+    address: {
+      type: String,
+    },
+    phone: {
+      type: String
     },
       isOnline: {
     type: Boolean,

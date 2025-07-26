@@ -17,7 +17,6 @@ export const createProduct = async (req: Request, res: Response) => {
       description,
       price,
       category,
-      brand,
       stock,
       images: image ? [image] : []
     });

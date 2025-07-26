@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { registerAdminService, getAdminsService, generateResetToken } from '../services/authService'; // import service functions
+import { registerAdminService, getAdminsService, generateResetToken,  loginUserService } from '../services/authService'; // import service functions
 // Removed duplicate or unused imports
 import * as authService from '../services/authService';
 import { forgotPassword } from '../services/authService';
@@ -47,4 +47,14 @@ export async function resetPassword(req: Request, res: Response) {
   } catch (error: any) {
     res.status(400).json({ message: error.message || 'Password reset failed' });
   }
-}
+};
+
+
+export const loginUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userData = await loginUserService(req.body);
+    res.status(200).json(userData);
+  } catch (error: any) {
+    res.status(401).json({ message: error.message });
+  }
+};

@@ -5,7 +5,6 @@ export interface IProduct extends Document {
   description: string;
   price: number;
   category: string;
-  brand: string;
   stock: number;
   images: string[]; // Array of image URLs
   isFeatured?: boolean;
@@ -32,10 +31,6 @@ const productSchema: Schema = new Schema<IProduct>(
     category: {
       type: String,
       required: [true, 'Category is required'],
-    },
-    brand: {
-      type: String,
-      required: [true, 'Brand is required'],
     },
     stock: {
       type: Number,
