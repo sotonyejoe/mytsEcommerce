@@ -8,26 +8,45 @@ import {
   deleteUserService,
 } from '../services/userService';
 import UserModel from '../models/user';
+import bcrypt from 'bcryptjs';
 
 export const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email } = req.body;
+    const { name, email, password, role, address, phone } = req.body;
 
-    // Check if user with the same email already exists
+    // Check for existing user
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
       res.status(400).json({ message: 'Email already exists. Please use another email.' });
       return;
     }
 
-    // Create user if email is unique
-    const user = await createUserService(req.body);
-    res.status(201).json(user);
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create the new user
+    const newUser = await UserModel.create({
+      name,
+      email,
+      password: hashedPassword,
+      role,
+      address,
+      phone,
+      isOnline: false, // default value
+    });
+
+    res.status(201).json({
+      id: newUser._id,
+      name: newUser.name,
+      email: newUser.email,
+      role: newUser.role,
+      phone: newUser.phone,
+      address: newUser.address,
+    });
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 };
-
 export const getAllUsers = async (req: Request, res: Response): Promise<void> => {
   try {
     const users = await getAllUsersService();

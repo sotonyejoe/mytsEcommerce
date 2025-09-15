@@ -3,6 +3,9 @@ import dotenv from 'dotenv';
 import connectDB from './config/db';
 import apiRoutes from './routes';
 import cors from "cors";
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./config/swagger";
+import * as OpenApiValidator from "express-openapi-validator";
 
 dotenv.config(); // Load .env first!
 
@@ -18,6 +21,9 @@ app.use(
 )
 
 app.use(express.json());
+
+// Swagger docs route
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Logging middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -39,6 +45,15 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   // console.error(err.stack);
   res.status(500).send("Something went wrong!");
 });
+
+// Validate requests/responses using your OpenAPI spec
+app.use(
+  OpenApiValidator.middleware({
+    apiSpec: "./src/config/swagger.json", // path to your swagger spec JSON
+    validateRequests: true, // validate request bodies, params, etc.
+    validateResponses: true, // validate responses too
+  })
+);
 
 app.use('/uploads', express.static('uploads'));
 app.use('/api', apiRoutes);

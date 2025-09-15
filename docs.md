@@ -104,7 +104,7 @@ createdAt
     {
       "name": "Jane Doe",
       "email": "jane@example.com",
-      "passwordHash": "password123",
+      "password": "password123",
       "role": "user",
       "address": "123 Main Street, Lagos",
       "phone": "+2348123456789"

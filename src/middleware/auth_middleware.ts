@@ -5,11 +5,12 @@ interface AuthRequest extends Request {
   user?: any; // you can define a better user type
 }
 
-export const protect = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const protect = (req: AuthRequest, res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Not authorized, token missing' });
+    res.status(401).json({ message: 'Not authorized, token missing' });
+    return; // Exit after sending response
   }
 
   const token = authHeader.split(' ')[1];
@@ -19,14 +20,17 @@ export const protect = (req: AuthRequest, res: Response, next: NextFunction) => 
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(401).json({ message: 'Not authorized, token invalid' });
+    res.status(401).json({ message: 'Not authorized, token invalid' });
+    return; // Exit after sending response
   }
 };
+  
 
 export const authorizeRoles = (...roles: string[]) => {
-  return (req: AuthRequest, res: Response, next: NextFunction) => {
+  return (req: AuthRequest, res: Response, next: NextFunction): void => {
     if (!req.user || !roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Access denied: insufficient role' });
+      res.status(403).json({ message: 'Access denied: insufficient role' });
+      return;
     }
     next();
   };

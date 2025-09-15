@@ -128,8 +128,8 @@ export async function resetPassword(resetToken: string, newPassword: string) {
 export const loginUserService = async (data: LoginInput) => {
   const { email, password } = data;
 
-  // Find user by email
-  const user = await UserModel.findOne({ email });
+  // Find user and include password
+  const user = await UserModel.findOne({ email }).select('+password');
   if (!user) {
     throw new Error('Invalid email or password');
   }
@@ -144,10 +144,10 @@ export const loginUserService = async (data: LoginInput) => {
   user.isOnline = true;
   await user.save();
 
-  // Generate JWT token (optional, adjust secret & expiry as you want)
+  // Generate JWT token
   const token = jwt.sign(
     { id: user._id, role: user.role },
-    process.env.JWT_SECRET || 'secret',
+    process.env.JWT_SECRET as string,
     { expiresIn: '1d' }
   );
 
@@ -159,7 +159,6 @@ export const loginUserService = async (data: LoginInput) => {
     token,
   };
 };
-
 
 export { generateResetToken };
 

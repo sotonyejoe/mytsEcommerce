@@ -53,8 +53,11 @@ export async function resetPassword(req: Request, res: Response) {
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const userData = await loginUserService(req.body);
-    res.status(200).json(userData);
+    res.status(200).json({
+      message: 'Login successful',
+      user: userData
+    });
   } catch (error: any) {
-    res.status(401).json({ message: error.message });
+    res.status(401).json({ message: error.message || 'Authentication failed' });
   }
 };
