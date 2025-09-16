@@ -9,7 +9,7 @@ export const protect = (req: AuthRequest, res: Response, next: NextFunction): vo
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({ message: 'Not authorized, token missing' });
+    res.status(400).json({ message: 'Not authorized, token missing or invalid' });
     return; // Exit after sending response
   }
 
@@ -20,7 +20,7 @@ export const protect = (req: AuthRequest, res: Response, next: NextFunction): vo
     req.user = decoded;
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Not authorized, token invalid' });
+    res.status(400).json({ message: 'Not authorized, token invalid' });
     return; // Exit after sending response
   }
 };

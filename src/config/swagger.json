@@ -11,11 +11,186 @@
       "description": "Local server"
     }
   ],
-  "security": [
-    {
-      "bearerAuth": []
+   "components": {
+    "securitySchemes": {
+      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+    },
+    "schemas": {
+      "UserCreate": {
+        "type": "object",
+        "required": ["name", "email", "password"],
+        "properties": {
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string" },
+          "role": { "type": "string", "enum": ["user", "admin", "subadmin"], "default": "user" },
+          "isOnline": { "type": "boolean" },
+          "lastSeen": { "type": "string", "format": "date-time" },
+          "address": { "type": "string" },
+          "phone": { "type": "string" }
+        }
+      },
+      "UserUpdate": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string" },
+          "address": { "type": "string" },
+          "phone": { "type": "string" }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": { "id": { "type": "string" }, "name": { "type": "string" }, "email": { "type": "string" }, "role": { "type": "string" } }
+      },
+
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "price": { "type": "number" },
+          "stock": { "type": "integer" },
+          "category": { "type": "string" },
+          "images": { "type": "array", "items": { "type": "string" } },
+          "isFeatured": { "type": "boolean" }
+        }
+      },
+      "ProductCreate": {
+        "type": "object",
+        "required": ["name", "price", "stock"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "price": { "type": "number" },
+          "stock": { "type": "integer" },
+          "category": { "type": "string" },
+          "images": { "type": "array", "items": { "type": "string", "format": "uri" } },
+          "isFeatured": { "type": "boolean" }
+        }
+      },
+      "ProductCreateMultipart": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "price": { "type": "number" },
+          "stock": { "type": "integer" },
+          "category": { "type": "string" },
+          "image": { "type": "string", "format": "binary" }
+        },
+        "required": ["name", "price"]
+      },
+      "ProductUpdate": {
+        "type": "object",
+        "properties": { "name": { "type": "string" }, "description": { "type": "string" }, "price": { "type": "number" }, "stock": { "type": "integer" }, "category": { "type": "string" }, "images": { "type": "array", "items": { "type": "string" } } }
+      },
+
+      "OrderCreate": {
+        "type": "object",
+        "required": ["user", "orderItems", "shippingAddress", "paymentMethod", "totalPrice"],
+        "properties": {
+          "user": { "type": "string" },
+          "orderItems": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["product", "quantity", "price"],
+              "properties": {
+                "product": { "type": "string" },
+                "quantity": { "type": "integer" },
+                "price": { "type": "number" }
+              }
+            }
+          },
+          "shippingAddress": {
+            "type": "object",
+            "required": ["address", "city", "postalCode", "country"],
+            "properties": { "address": { "type": "string" }, "city": { "type": "string" }, "postalCode": { "type": "string" }, "country": { "type": "string" } }
+          },
+          "paymentMethod": { "type": "string" },
+          "paymentStatus": { "type": "string" },
+          "orderStatus": { "type": "string" },
+          "totalPrice": { "type": "number" }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "user": { "type": "string" },
+          "orderItems": { "type": "array", "items": { "type": "object", "properties": { "product": { "type": "string" }, "quantity": { "type": "integer" }, "price": { "type": "number" } } } },
+          "shippingAddress": { "type": "object", "properties": { "address": { "type": "string" }, "city": { "type": "string" }, "postalCode": { "type": "string" }, "country": { "type": "string" } } },
+          "paymentMethod": { "type": "string" },
+          "paymentStatus": { "type": "string" },
+          "orderStatus": { "type": "string" },
+          "totalPrice": { "type": "number" }
+        }
+      },
+      "OrderUpdate": {
+        "type": "object",
+        "properties": { "orderStatus": { "type": "string" }, "paymentStatus": { "type": "string" } }
+      },
+
+      "Category": {
+        "type": "object",
+        "required": ["name"],
+        "properties": { "id": { "type": "string" }, "name": { "type": "string" }, "description": { "type": "string" } }
+      },
+
+      "Cart": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "user": { "type": "string" },
+          "items": { "type": "array", "items": { "type": "object", "properties": { "product": { "type": "string" }, "quantity": { "type": "integer" } } } }
+        }
+      },
+      "CartAddItem": {
+        "type": "object",
+        "required": ["product", "quantity"],
+        "properties": { "product": { "type": "string" }, "quantity": { "type": "integer", "minimum": 1 } }
+      },
+
+      "PaymentCreate": {
+        "type": "object",
+        "required": ["order", "amount", "paymentMethod"],
+        "properties": {
+          "order": { "type": "string" },
+          "paymentId": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "completed", "failed"] },
+          "amount": { "type": "number" },
+          "paymentMethod": { "type": "string" }
+        }
+      },
+      "Payment": {
+        "type": "object",
+        "properties": { "id": { "type": "string" }, "order": { "type": "string" }, "paymentId": { "type": "string" }, "status": { "type": "string" }, "amount": { "type": "number" }, "paymentMethod": { "type": "string" } }
+      },
+      "PaymentUpdate": { "type": "object", "properties": { "status": { "type": "string" } } },
+
+      "AdminRegister": { "type": "object", "required": ["name", "email", "password"], "properties": { "name": { "type": "string" }, "email": { "type": "string" }, "password": { "type": "string" } } },
+      "LoginRequest": { "type": "object", "required": ["email", "password"], "properties": { "email": { "type": "string" }, "password": { "type": "string" } } },
+      "Admin": { "type": "object", "properties": { "id": { "type": "string" }, "name": { "type": "string" }, "email": { "type": "string" }, "role": { "type": "string" } } },
+      "AuthResponse": { "type": "object", "properties": { "token": { "type": "string" }, "user": { "$ref": "#/components/schemas/Admin" } } },
+
+        "ErrorResponse": {
+        "type": "object",
+        "properties": {
+        "message": {
+          "type": "string",
+          "example": "Error description"
+        }
+      },
+      "required": ["message"]
+      }
+
     }
-  ],
+
+  },
+
   "paths": {
     "/users": {
       "get": {
@@ -56,17 +231,27 @@
               }
             }
           },
-          "400": { "description": "Bad request" }
+          "400": {
+            "description": "Invalid credentials or token missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse" 
+            }
+          }
+        }
+      }
         }
       }
     },
 
     "/users/{id}": {
-      "parameters": [
-        { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
-      ],
+    
       "get": {
         "summary": "Get user by id",
+        "parameters": [
+        { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+      ],
         "tags": ["Users"],
         "responses": {
           "200": { "description": "User found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserResponse" }, "example": { "id": "64f1c72d8a1f3c4567d89ab1", "name": "John Doe", "email": "john@example.com", "role": "user" } } } },
@@ -82,7 +267,16 @@
         },
         "responses": {
           "200": { "description": "User updated", "content": { "application/json": { "example": { "id": "64f1c72d8a1f3c4567d89ab1", "name": "John Updated", "email": "john@example.com" } } } },
-          "400": { "description": "Invalid request" },
+          "400": {
+            "description": "Invalid credentials or token missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse" 
+            }
+          }
+        }
+      },
           "404": { "description": "User not found" }
         }
       },
@@ -134,15 +328,24 @@
         },
         "responses": {
           "201": { "description": "Product created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Product" }, "example": { "id": "6500b22f9d12345678c9ab33", "name": "Samsung Galaxy S23", "price": 1000 } } } },
-          "400": { "description": "Bad request" }
+          "400": {
+            "description": "Invalid credentials or token missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse" 
+            }
+          }
+        }
+      }
         }
       }
     },
 
     "/products/{id}": {
-      "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
       "get": {
         "summary": "Get product by id",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": {"type": "string", "example": "6500f62f9d12345678c9ab77" } }],
         "tags": ["Products"],
         "responses": {
           "200": { "description": "Product found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Product" } } } },
@@ -202,7 +405,16 @@
         },
         "responses": {
           "201": { "description": "Order created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Order" }, "example": { "id": "6500c32f9d12345678c9ab44", "orderStatus": "pending", "totalPrice": 2000 } } } },
-          "400": { "description": "Bad request" }
+          "400": {
+            "description": "Invalid credentials or token missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse" 
+            }
+          }
+        }
+      }
         }
       }
     },
@@ -380,204 +592,131 @@
         "summary": "Register admin",
         "tags": ["Auth"],
         "security": [],
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AdminRegister" }, "example": { "name": "Jane Admin", "email": "janeadmin@example.com", "password": "SecurePass123" } } } },
-        "responses": { "201": { "description": "Admin registered", "content": { "application/json": { "example": { "id": "6500f62f9d12345678c9ab77", "name": "Jane Admin", "email": "janeadmin@example.com", "role": "admin" } } } }, "400": { "description": "Invalid input" } }
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminRegister" },
+              "example": {
+                "name": "Jane Admin",
+                "email": "janeadmin@example.com",
+                "password": "SecurePass123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Admin registered",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": "6500f62f9d12345678c9ab77",
+                  "name": "Jane Admin",
+                  "email": "janeadmin@example.com",
+                  "role": "admin"
+                }
+              }
+            }
+          },
+          "400": {  
+              "description": "Invalid input",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "boolean", "example": false },
+                      "message": { "type": "string", "example": "Invalid input data" },
+                      "errors": {
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "example": ["Email is required", "Password must be at least 8 characters"]
+                      }
+                    },
+                    "required": ["success", "message"]
+                  },
+                  "example": {
+                    "success": false,
+                    "message": "Invalid input data",
+                    "errors": ["Email is required", "Password must be at least 8 characters"]
+                  }
+                 }
+              }
+        }
+        }
       }
     },
-
     "/auth/admins": {
       "get": {
         "summary": "Get all admins",
         "tags": ["Auth"],
-        "responses": { "200": { "description": "List of admins", "content": { "application/json": { "example": [ { "id": "6500f62f9d12345678c9ab77", "name": "Jane Admin", "email": "janeadmin@example.com" } ] } } } }
-      }
-    },
-
-    "/auth/login": {
-      "post": {
-        "summary": "Login (user or admin)",
-        "tags": ["Auth"],
-        "security": [],
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoginRequest" }, "example": { "email": "janeadmin@example.com", "password": "SecurePass123" } } } },
         "responses": {
           "200": {
-            "description": "Login successful (returns token + user)",
+            "description": "List of admins",
             "content": {
               "application/json": {
-                "example": { "token": "jwt_token_here", "user": { "id": "6500f62f9d12345678c9ab77", "name": "Jane Admin", "email": "janeadmin@example.com", "role": "admin" } }
+                "example": [
+                  {
+                    "id": "6500f62f9d12345678c9ab77",
+                    "name": "Jane Admin",
+                    "email": "janeadmin@example.com"
+                  }
+                ]
               }
             }
-          },
-          "401": { "description": "Invalid credentials" }
+          }
+        }
+      }
+    },
+   "/auth/login": {
+  "post": {
+    "summary": "Login (user or admin)",
+    "tags": ["Auth"],
+    "security": [],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": { "$ref": "#/components/schemas/LoginRequest" },
+          "example": {
+            "email": "janeadmin@example.com",
+            "password": "SecurePass123"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Login successful (returns token + user)",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/AuthResponse" },
+            "example": {
+              "success": true,
+              "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+              "user": {
+                "id": "6500f62f9d12345678c9ab77",
+                "name": "Jane Admin",
+                "email": "janeadmin@example.com",
+                "role": "admin"
+              }
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "Invalid credentials or token missing",
+        "content": {
+          "application/json": {
+            "schema": {
+               "$ref": "#/components/schemas/ErrorResponse" 
+            }
+          }
         }
       }
     }
-  },
-
-  "components": {
-    "securitySchemes": {
-      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
-    },
-    "schemas": {
-      "UserCreate": {
-        "type": "object",
-        "required": ["name", "email", "password"],
-        "properties": {
-          "name": { "type": "string" },
-          "email": { "type": "string", "format": "email" },
-          "password": { "type": "string" },
-          "role": { "type": "string", "enum": ["user", "admin", "subadmin"], "default": "user" },
-          "isOnline": { "type": "boolean" },
-          "lastSeen": { "type": "string", "format": "date-time" },
-          "address": { "type": "string" },
-          "phone": { "type": "string" }
-        }
-      },
-      "UserUpdate": {
-        "type": "object",
-        "properties": {
-          "name": { "type": "string" },
-          "email": { "type": "string", "format": "email" },
-          "password": { "type": "string" },
-          "address": { "type": "string" },
-          "phone": { "type": "string" }
-        }
-      },
-      "UserResponse": {
-        "type": "object",
-        "properties": { "id": { "type": "string" }, "name": { "type": "string" }, "email": { "type": "string" }, "role": { "type": "string" } }
-      },
-
-      "Product": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "description": { "type": "string" },
-          "price": { "type": "number" },
-          "stock": { "type": "integer" },
-          "category": { "type": "string" },
-          "images": { "type": "array", "items": { "type": "string" } },
-          "isFeatured": { "type": "boolean" }
-        }
-      },
-      "ProductCreate": {
-        "type": "object",
-        "required": ["name", "price", "stock"],
-        "properties": {
-          "name": { "type": "string" },
-          "description": { "type": "string" },
-          "price": { "type": "number" },
-          "stock": { "type": "integer" },
-          "category": { "type": "string" },
-          "images": { "type": "array", "items": { "type": "string", "format": "uri" } },
-          "isFeatured": { "type": "boolean" }
-        }
-      },
-      "ProductCreateMultipart": {
-        "type": "object",
-        "properties": {
-          "name": { "type": "string" },
-          "description": { "type": "string" },
-          "price": { "type": "number" },
-          "stock": { "type": "integer" },
-          "category": { "type": "string" },
-          "image": { "type": "string", "format": "binary" }
-        },
-        "required": ["name", "price"]
-      },
-      "ProductUpdate": {
-        "type": "object",
-        "properties": { "name": { "type": "string" }, "description": { "type": "string" }, "price": { "type": "number" }, "stock": { "type": "integer" }, "category": { "type": "string" }, "images": { "type": "array", "items": { "type": "string" } } }
-      },
-
-      "OrderCreate": {
-        "type": "object",
-        "required": ["user", "orderItems", "shippingAddress", "paymentMethod", "totalPrice"],
-        "properties": {
-          "user": { "type": "string" },
-          "orderItems": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": ["product", "quantity", "price"],
-              "properties": {
-                "product": { "type": "string" },
-                "quantity": { "type": "integer" },
-                "price": { "type": "number" }
-              }
-            }
-          },
-          "shippingAddress": {
-            "type": "object",
-            "required": ["address", "city", "postalCode", "country"],
-            "properties": { "address": { "type": "string" }, "city": { "type": "string" }, "postalCode": { "type": "string" }, "country": { "type": "string" } }
-          },
-          "paymentMethod": { "type": "string" },
-          "paymentStatus": { "type": "string" },
-          "orderStatus": { "type": "string" },
-          "totalPrice": { "type": "number" }
-        }
-      },
-      "Order": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string" },
-          "user": { "type": "string" },
-          "orderItems": { "type": "array", "items": { "type": "object", "properties": { "product": { "type": "string" }, "quantity": { "type": "integer" }, "price": { "type": "number" } } } },
-          "shippingAddress": { "type": "object", "properties": { "address": { "type": "string" }, "city": { "type": "string" }, "postalCode": { "type": "string" }, "country": { "type": "string" } } },
-          "paymentMethod": { "type": "string" },
-          "paymentStatus": { "type": "string" },
-          "orderStatus": { "type": "string" },
-          "totalPrice": { "type": "number" }
-        }
-      },
-      "OrderUpdate": {
-        "type": "object",
-        "properties": { "orderStatus": { "type": "string" }, "paymentStatus": { "type": "string" } }
-      },
-
-      "Category": {
-        "type": "object",
-        "required": ["name"],
-        "properties": { "id": { "type": "string" }, "name": { "type": "string" }, "description": { "type": "string" } }
-      },
-
-      "Cart": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string" },
-          "user": { "type": "string" },
-          "items": { "type": "array", "items": { "type": "object", "properties": { "product": { "type": "string" }, "quantity": { "type": "integer" } } } }
-        }
-      },
-      "CartAddItem": {
-        "type": "object",
-        "required": ["product", "quantity"],
-        "properties": { "product": { "type": "string" }, "quantity": { "type": "integer", "minimum": 1 } }
-      },
-
-      "PaymentCreate": {
-        "type": "object",
-        "required": ["order", "amount", "paymentMethod"],
-        "properties": {
-          "order": { "type": "string" },
-          "paymentId": { "type": "string" },
-          "status": { "type": "string", "enum": ["pending", "completed", "failed"] },
-          "amount": { "type": "number" },
-          "paymentMethod": { "type": "string" }
-        }
-      },
-      "Payment": {
-        "type": "object",
-        "properties": { "id": { "type": "string" }, "order": { "type": "string" }, "paymentId": { "type": "string" }, "status": { "type": "string" }, "amount": { "type": "number" }, "paymentMethod": { "type": "string" } }
-      },
-      "PaymentUpdate": { "type": "object", "properties": { "status": { "type": "string" } } },
-
-      "AdminRegister": { "type": "object", "required": ["name", "email", "password"], "properties": { "name": { "type": "string" }, "email": { "type": "string" }, "password": { "type": "string" } } },
-      "LoginRequest": { "type": "object", "required": ["email", "password"], "properties": { "email": { "type": "string" }, "password": { "type": "string" } } },
-      "Admin": { "type": "object", "properties": { "id": { "type": "string" }, "name": { "type": "string" }, "email": { "type": "string" }, "role": { "type": "string" } } },
-      "AuthResponse": { "type": "object", "properties": { "token": { "type": "string" }, "user": { "$ref": "#/components/schemas/Admin" } } }
-    }
   }
+}
+}
 }

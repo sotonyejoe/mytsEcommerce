@@ -9,6 +9,7 @@ import {
 } from '../services/userService';
 import UserModel from '../models/user';
 import bcrypt from 'bcryptjs';
+import generateToken from "../utils/generateToken";
 
 export const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -17,15 +18,17 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
     // Check for existing user
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
-      res.status(400).json({ message: 'Email already exists. Please use another email.' });
+      res
+        .status(400)
+        .json({ message: "Email already exists. Please use another email." });
       return;
     }
 
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
+  
 
     // Create the new user
-    const newUser = await UserModel.create({
+    const newUser = await createUserService({
       name,
       email,
       password: hashedPassword,
@@ -42,11 +45,14 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
       role: newUser.role,
       phone: newUser.phone,
       address: newUser.address,
+      token: generateToken(newUser._id.toString()), // 🔑 include token
     });
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 };
+
+
 export const getAllUsers = async (req: Request, res: Response): Promise<void> => {
   try {
     const users = await getAllUsersService();

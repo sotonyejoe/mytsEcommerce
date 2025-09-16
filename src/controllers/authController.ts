@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { registerAdminService, getAdminsService, generateResetToken,  loginUserService } from '../services/authService'; // import service functions
-// Removed duplicate or unused imports
 import * as authService from '../services/authService';
 import { forgotPassword } from '../services/authService';
 
@@ -58,6 +57,6 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       user: userData
     });
   } catch (error: any) {
-    res.status(401).json({ message: error.message || 'Authentication failed' });
+    res.status(400).json({ message: error.message || 'Authentication failed' });
   }
 };

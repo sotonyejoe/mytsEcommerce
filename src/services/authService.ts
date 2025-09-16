@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import UserModel from '../models/user';
 import sendEmail  from '../utils/sendEmail';
-import  {generateResetToken}  from '../utils/tokenGenerator';
+import  {generateResetToken}  from '../utils/generateToken';
 import ActivityModel from '../models/activity';
 import jwt from 'jsonwebtoken';
 

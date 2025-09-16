@@ -1,7 +1,10 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, ObjectId} from 'mongoose';
+import bcrypt from "bcryptjs"
+
 
 // 1. Define a TypeScript interface for the User document
 export interface IUser extends Document {
+  _id: ObjectId;
   name: string;
   email: string;
   password: string;
@@ -12,6 +15,7 @@ export interface IUser extends Document {
   phone: string;
   resetPasswordToken?: string;
   resetPasswordExpire?: Date;
+  matchPassword(enteredPassword: string): Promise<boolean>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -60,6 +64,15 @@ const userSchema = new Schema<IUser>(
     timestamps: true // Automatically creates `createdAt` and `updatedAt`
   }
 );
+
+// hash password before saving
+userSchema.pre("save", async function (next) {
+  if(!this.isModified("password")) return next();
+
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+})
 
 // 3. Create and export the model
 const UserModel = model<IUser>('User', userSchema);
