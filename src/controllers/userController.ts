@@ -19,7 +19,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
       res
-        .status(400)
+        .status(409)
         .json({ message: "Email already exists. Please use another email." });
       return;
     }
